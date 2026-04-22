@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id           String      @id @default(cuid())
+  fullName     String
+  email        String      @unique
+  password     String
+  phone        String?
+  address      String?
+  role         UserRole    @default(CUSTOMER)
+  cartItems    CartItem[]
+  orders       Order[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  name          String        @unique
+  slug          String        @unique
+  imageUrl      String?
+  subcategories Subcategory[]
+  products      Product[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Subcategory {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  imageUrl    String?
+  categoryId  String
+  category    Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products    Product[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([categoryId, name])
+}
+
+model Product {
+  id             String        @id @default(cuid())
+  name           String
+  slug           String        @unique
+  description    String?
+  price          Decimal       @db.Decimal(10, 2)
+  imageUrl       String?
+  stock          Int           @default(0)
+  isActive       Boolean       @default(true)
+  unit           String?
+  categoryId     String
+  subcategoryId  String?
+  category       Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  subcategory    Subcategory?  @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([categoryId])
+  @@index([subcategoryId])
+  @@index([name])
+}
+
+model CartItem {
+  id          String    @id @default(cuid())
+  userId      String
+  productId   String
+  quantity    Int
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+model Order {
+  id               String       @id @default(cuid())
+  userId           String
+  status           OrderStatus  @default(PENDING)
+  totalAmount      Decimal      @db.Decimal(10, 2)
+  deliveryAddress  String
+  contactPhone     String
+  notes            String?
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items            OrderItem[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id            String    @id @default(cuid())
+  orderId       String
+  productId     String?
+  productName   String
+  productPrice  Decimal   @db.Decimal(10, 2)
+  quantity      Int
+  subtotal      Decimal   @db.Decimal(10, 2)
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product       Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  createdAt     DateTime  @default(now())
+
+  @@index([orderId])
+}

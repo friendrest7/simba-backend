@@ -1,0 +1,44 @@
+{
+  "name": "simba-backend",
+  "version": "1.0.0",
+  "description": "Production-ready backend for the Simba grocery delivery app.",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "seed": "node prisma/seed.js"
+  },
+  "keywords": [
+    "express",
+    "prisma",
+    "postgresql",
+    "jwt",
+    "grocery",
+    "backend"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.7.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "http-status-codes": "^2.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "prisma": "^6.7.0"
+  }
+}
